@@ -502,9 +502,14 @@ export default function InvitationDetailPage({ params }: { params: Promise<{ slu
 
             {/* Order Button */}
             <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg">
-              <button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg">
+              <a 
+                href={`https://wa.me/905432740104?text=Merhabalar, ${davetiyeKodu} numaralı davetiyeden ${quantity} adet sipariş vermek istiyorum. Toplam fiyat: ₺${totalPrice.toFixed(2)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg block text-center"
+              >
                 Sipariş Ver
-              </button>
+              </a>
               <p className="text-center text-sm text-gray-600 dark:text-gray-300 mt-3">
                 Ücretsiz kargo ile hızlı teslimat
               </p>
@@ -520,15 +525,17 @@ export default function InvitationDetailPage({ params }: { params: Promise<{ slu
           {(() => {
             const currentCode = extractCodeFromUrl(davetiyeKodu || '');
             const currentFeatures = invitation?.priceData || { is_sealed: 0, is_inner_gilded: 0, is_envelope_gilded: 0, is_transparent: 0 };
+            
+            // Deterministik benzer davetiyeler seçimi
             const similarInvitations = getSimilarInvitations(currentFeatures, currentCode, 12);
             
-            return similarInvitations.map((item) => {
+            return similarInvitations.slice(0, 8).map((item, index) => {
               const relatedInvitation = getInvitationDetails(item.category, `dugun-davetiyesi-${item.code}`);
               if (!relatedInvitation) return null;
               
               return (
                 <Link 
-                  key={`${item.category}-${item.code}`} 
+                  key={`${item.category}-${item.code}-${index}`} 
                   href={`/${item.category}/dugun-davetiyesi-${item.code}`}
                   className="group block"
                 >
