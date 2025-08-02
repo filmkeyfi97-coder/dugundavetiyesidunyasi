@@ -34,7 +34,7 @@ export default function GizlilikPolitikasiPage() {
                 1. Genel Bilgiler
               </h2>
               <p className="text-gray-700 dark:text-gray-300 mb-4">
-                Bu gizlilik politikası, Şenay Matbaacılık ("Biz", www.dugundavetiyesidunyasi.com) tarafından sunulan hizmetlerden yararlanan kullanıcıların kişisel verilerinin nasıl toplandığını, kullanıldığını ve korunduğunu açıklamaktadır.
+                Bu gizlilik politikası, Şenay Matbaacılık (&ldquo;Biz&rdquo;, www.dugundavetiyesidunyasi.com) tarafından sunulan hizmetlerden yararlanan kullanıcıların kişisel verilerinin nasıl toplandığını, kullanıldığını ve korunduğunu açıklamaktadır.
               </p>
             </section>
 
