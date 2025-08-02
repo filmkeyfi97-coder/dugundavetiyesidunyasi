@@ -230,12 +230,78 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
   const { slug } = use(params);
   const category = categoryInfo[slug as keyof typeof categoryInfo];
   const [showAll, setShowAll] = useState(false);
+  const [activeFilter, setActiveFilter] = useState('tümü');
+  const [sortBy, setSortBy] = useState('popüler');
   
   if (!category) {
     notFound();
   }
   
-  const models = getInvitationModels(slug, showAll ? undefined : 20);
+  // Tüm modelleri al
+  const allModels = getInvitationModels(slug);
+  
+  // Filtreleme fonksiyonu
+  const filterModels = (models: ReturnType<typeof getInvitationModels>) => {
+    let filtered = [...models];
+    
+    // Filtre uygula
+    switch (activeFilter) {
+      case 'popüler':
+        // Popüler olanları (mühürlü, yaldızlı) öne çıkar
+        filtered = filtered.filter(model => {
+          const features = getInvitationFeatures(slug, model.code);
+          return features.is_sealed === 1 || features.is_inner_gilded === 1 || features.is_envelope_gilded === 1;
+        });
+        break;
+      case 'yeni':
+        // Yeni olanları (şeffaf, modern) öne çıkar
+        filtered = filtered.filter(model => {
+          const features = getInvitationFeatures(slug, model.code);
+          return features.is_transparent === 1;
+        });
+        break;
+      default:
+        // Tümü - filtreleme yok
+        break;
+    }
+    
+    // Sıralama uygula
+    switch (sortBy) {
+      case 'popüler':
+        // Popülerlik sırası (mühürlü > yaldızlı > normal)
+        filtered.sort((a, b) => {
+          const featuresA = getInvitationFeatures(slug, a.code);
+          const featuresB = getInvitationFeatures(slug, b.code);
+          const scoreA = (featuresA.is_sealed * 3) + (featuresA.is_inner_gilded * 2) + (featuresA.is_envelope_gilded * 2);
+          const scoreB = (featuresB.is_sealed * 3) + (featuresB.is_inner_gilded * 2) + (featuresB.is_envelope_gilded * 2);
+          return scoreB - scoreA;
+        });
+        break;
+      case 'yeni':
+        // Yeni sırası (şeffaf > modern > klasik)
+        filtered.sort((a, b) => {
+          const featuresA = getInvitationFeatures(slug, a.code);
+          const featuresB = getInvitationFeatures(slug, b.code);
+          const scoreA = (featuresA.is_transparent * 3) + (featuresA.is_inner_gilded * 1) + (featuresA.is_envelope_gilded * 1);
+          const scoreB = (featuresB.is_transparent * 3) + (featuresB.is_inner_gilded * 1) + (featuresB.is_envelope_gilded * 1);
+          return scoreB - scoreA;
+        });
+        break;
+      case 'fiyat-düşük':
+        // Fiyat düşükten yükseğe
+        filtered.sort((a, b) => parseFloat(a.price.replace('₺', '')) - parseFloat(b.price.replace('₺', '')));
+        break;
+      case 'fiyat-yüksek':
+        // Fiyat yüksekten düşüğe
+        filtered.sort((a, b) => parseFloat(b.price.replace('₺', '')) - parseFloat(a.price.replace('₺', '')));
+        break;
+    }
+    
+    return filtered;
+  };
+  
+  const filteredModels = filterModels(allModels);
+  const models = showAll ? filteredModels : filteredModels.slice(0, 20);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
@@ -290,23 +356,48 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
         <div className="flex flex-wrap items-center justify-between mb-8 p-4 bg-white dark:bg-gray-800 rounded-xl shadow-lg">
           <div className="flex items-center space-x-4">
             <span className="text-gray-600 dark:text-gray-300 font-medium">Filtrele:</span>
-            <button className="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm font-medium">
+            <button 
+              onClick={() => setActiveFilter('tümü')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                activeFilter === 'tümü' 
+                  ? 'bg-blue-500 text-white' 
+                  : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+              }`}
+            >
               Tümü
             </button>
-            <button className="px-4 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-sm font-medium transition-colors">
+            <button 
+              onClick={() => setActiveFilter('popüler')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                activeFilter === 'popüler' 
+                  ? 'bg-blue-500 text-white' 
+                  : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+              }`}
+            >
               Popüler
             </button>
-            <button className="px-4 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-sm font-medium transition-colors">
+            <button 
+              onClick={() => setActiveFilter('yeni')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                activeFilter === 'yeni' 
+                  ? 'bg-blue-500 text-white' 
+                  : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+              }`}
+            >
               Yeni
             </button>
           </div>
           <div className="flex items-center space-x-2">
             <span className="text-gray-600 dark:text-gray-300 text-sm">Sırala:</span>
-            <select className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300">
-              <option>En Popüler</option>
-              <option>En Yeni</option>
-              <option>Fiyat: Düşük-Yüksek</option>
-              <option>Fiyat: Yüksek-Düşük</option>
+            <select 
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300"
+            >
+              <option value="popüler">En Popüler</option>
+              <option value="yeni">En Yeni</option>
+              <option value="fiyat-düşük">Fiyat: Düşük-Yüksek</option>
+              <option value="fiyat-yüksek">Fiyat: Yüksek-Düşük</option>
             </select>
           </div>
         </div>
@@ -356,13 +447,13 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
         </div>
 
         {/* Load More */}
-        {!showAll && (
+        {!showAll && filteredModels.length > 20 && (
           <div className="text-center mt-12">
             <button 
               onClick={() => setShowAll(true)}
               className="px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-full font-semibold hover:from-blue-600 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 shadow-lg"
             >
-              Daha Fazla Göster
+              Daha Fazla Göster ({filteredModels.length - 20} daha)
             </button>
           </div>
         )}
