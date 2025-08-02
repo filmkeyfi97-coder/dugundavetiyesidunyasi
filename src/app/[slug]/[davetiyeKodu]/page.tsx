@@ -115,7 +115,7 @@ const getSimilarInvitations = (currentFeatures: InvitationFeatures, currentCode:
     return score;
   };
   
-  // Tüm davetiyeleri değerlendir ve rastgele karıştır
+  // Tüm davetiyeleri değerlendir
   const allScoredInvitations = allCodes
     .filter(item => item.code !== currentCode) // Mevcut davetiyeyi hariç tut
     .map(item => {
@@ -126,8 +126,7 @@ const getSimilarInvitations = (currentFeatures: InvitationFeatures, currentCode:
         features,
         score
       };
-    })
-    .sort(() => Math.random() - 0.5); // Önce rastgele karıştır
+    });
   
   // Benzer özellikli davetiyeleri al
   const similarInvitations = allScoredInvitations
@@ -140,14 +139,13 @@ const getSimilarInvitations = (currentFeatures: InvitationFeatures, currentCode:
     .filter(item => item.score === 0) // Hiç benzer özelliği olmayanlar
     .slice(0, Math.floor(limit / 4)); // Çeşitlilik için 1/4
   
-  // Rastgele davetiyeleri al
-  const randomInvitations = allScoredInvitations
+  // Kalan davetiyeleri al
+  const remainingInvitations = allScoredInvitations
     .filter(item => !similarInvitations.includes(item) && !diverseInvitations.includes(item))
     .slice(0, limit - similarInvitations.length - diverseInvitations.length);
   
-  // Tüm listeleri birleştir ve rastgele karıştır
-  const finalList = [...similarInvitations, ...diverseInvitations, ...randomInvitations]
-    .sort(() => Math.random() - 0.5)
+  // Tüm listeleri birleştir (deterministik sıralama)
+  const finalList = [...similarInvitations, ...diverseInvitations, ...remainingInvitations]
     .slice(0, limit);
   
   return finalList;
