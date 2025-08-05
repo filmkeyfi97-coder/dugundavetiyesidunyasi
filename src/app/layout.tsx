@@ -5,6 +5,8 @@ import GoogleTagManager from "../analytics/GoogleTagManager";
 import GoogleTagManagerNoScript from "../analytics/GoogleTagManagerNoScript";
 import GoogleAnalytics from "../analytics/GoogleAnalytics";
 import SchemaMarkup from "../analytics/SchemaMarkup";
+import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -99,6 +101,8 @@ export default function RootLayout({
       >
         <GoogleTagManagerNoScript />
         {children}
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );

@@ -121,7 +121,7 @@ const calculatePrice = (basePrice: number, quantity: number = 50, features?: { i
   // Mühürlü zarf için adet başı ücret + tek seferlik ücret
   let muhurUcreti = 0;
   if (features && features.is_sealed === 1) {
-    muhurUcreti = quantity * 9.5 + 450; // Adet başı 9.5 TL + tek seferlik 450 TL
+    muhurUcreti = quantity * 12.5 + 450; // Adet başı 12.5 TL + tek seferlik 450 TL
   }
   
   // Toplam fiyat
@@ -354,39 +354,6 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
 
         {/* Filters */}
         <div className="flex flex-wrap items-center justify-between mb-8 p-4 bg-white dark:bg-gray-800 rounded-xl shadow-lg">
-          <div className="flex items-center space-x-4">
-            <span className="text-gray-600 dark:text-gray-300 font-medium">Filtrele:</span>
-            <button 
-              onClick={() => setActiveFilter('tümü')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                activeFilter === 'tümü' 
-                  ? 'bg-blue-500 text-white' 
-                  : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-              }`}
-            >
-              Tümü
-            </button>
-            <button 
-              onClick={() => setActiveFilter('popüler')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                activeFilter === 'popüler' 
-                  ? 'bg-blue-500 text-white' 
-                  : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-              }`}
-            >
-              Popüler
-            </button>
-            <button 
-              onClick={() => setActiveFilter('yeni')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                activeFilter === 'yeni' 
-                  ? 'bg-blue-500 text-white' 
-                  : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-              }`}
-            >
-              Yeni
-            </button>
-          </div>
           <div className="flex items-center space-x-2">
             <span className="text-gray-600 dark:text-gray-300 text-sm">Sırala:</span>
             <select 
